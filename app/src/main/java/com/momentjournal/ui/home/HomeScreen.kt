@@ -5,6 +5,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -13,6 +18,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.momentjournal.MomentJournalApp
 import com.momentjournal.ui.components.CalendarView
 import com.momentjournal.ui.components.EmptyState
+import com.momentjournal.ui.components.TimelineCard
 import com.momentjournal.ui.navigation.Routes
 import com.momentjournal.util.DateTimeUtil
 
@@ -90,18 +96,25 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(records, key = { it.id }) { record ->
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.medium,
-                            color = MaterialTheme.colorScheme.surface,
-                            tonalElevation = 1.dp
-                        ) {
-                            Text(
-                                text = DateTimeUtil.formatTime(record.dateTime),
-                                modifier = Modifier.padding(12.dp),
-                                style = MaterialTheme.typography.bodyMedium
+                        var blocks by remember { mutableStateOf<List<com.momentjournal.data.entity.BlockEntity>>(emptyList()) }
+                        var tags by remember { mutableStateOf<List<com.momentjournal.data.entity.TagEntity>>(emptyList()) }
+                        val context = androidx.compose.ui.platform.LocalContext.current
+                        LaunchedEffect(record.id) {
+                            val app = context.applicationContext as MomentJournalApp
+                            val repo = com.momentjournal.data.repository.RecordRepository(
+                                app.database.recordDao(),
+                                app.database.blockDao(),
+                                app.database.recordTagDao()
                             )
+                            blocks = repo.getBlocksForRecord(record.id)
+                            tags = repo.getTagsForRecord(record.id)
                         }
+                        TimelineCard(
+                            record = record,
+                            blocks = blocks,
+                            tags = tags,
+                            onClick = { navController.navigate(Routes.detail(record.id)) }
+                        )
                     }
                 }
             }
