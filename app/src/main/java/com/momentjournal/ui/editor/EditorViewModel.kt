@@ -74,6 +74,15 @@ class EditorViewModel(
         _blocks.value = _blocks.value.toMutableList().also { it.removeAt(index) }
     }
 
+    fun moveBlock(fromIndex: Int, toIndex: Int) {
+        val list = _blocks.value.toMutableList()
+        if (fromIndex in list.indices && toIndex in list.indices && fromIndex != toIndex) {
+            val item = list.removeAt(fromIndex)
+            list.add(toIndex, item)
+            _blocks.value = list
+        }
+    }
+
     fun toggleTag(tagId: Long) {
         val current = _selectedTagIds.value
         _selectedTagIds.value = if (tagId in current) current - tagId else current + tagId
