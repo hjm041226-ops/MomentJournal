@@ -104,12 +104,11 @@ fun CalendarView(
             modifier = Modifier.pointerInput(Unit) {
                 detectHorizontalDragGestures(
                     onDragEnd = {
-                        if (accumulatedDrag.value > 40) {
-                            // Swipe right → next month
-                            currentMonth = if (month == 11) year + 1 to 0 else year to month + 1
-                        } else if (accumulatedDrag.value < -40) {
-                            // Swipe left → previous month
-                            currentMonth = if (month == 0) year - 1 to 11 else year to month - 1
+                        val (y, m) = currentMonth
+                        if (accumulatedDrag.value < -40) {
+                            currentMonth = if (m == 11) y + 1 to 0 else y to m + 1
+                        } else if (accumulatedDrag.value > 40) {
+                            currentMonth = if (m == 0) y - 1 to 11 else y to m - 1
                         }
                         accumulatedDrag.value = 0f
                     },

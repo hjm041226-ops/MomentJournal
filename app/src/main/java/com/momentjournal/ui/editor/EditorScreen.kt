@@ -61,6 +61,17 @@ fun EditorScreen(
     }
     val mediaManager = remember { MediaManager(context) }
 
+    // Pending action to execute after permission is granted
+    var pendingMediaAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+
+    // Auto-trigger pending action when permissions are granted
+    LaunchedEffect(audioPermissionGranted.value, cameraPermissionGranted.value) {
+        if (audioPermissionGranted.value || cameraPermissionGranted.value) {
+            pendingMediaAction?.invoke()
+            pendingMediaAction = null
+        }
+    }
+
     // Save blocks to temp file before external intent (protection against process death)
     fun saveDraft() {
         val currentBlocks = viewModel.blocks.value
@@ -267,6 +278,14 @@ fun EditorScreen(
                         showMediaPicker = null
                         saveDraft()
                         if (!cameraPermissionGranted.value) {
+                            pendingMediaAction = {
+                                val file = mediaManager.createImageFile()
+                                pendingCameraFile = file
+                                val uri = FileProvider.getUriForFile(
+                                    context, "${context.packageName}.fileprovider", file
+                                )
+                                cameraLauncher.launch(uri)
+                            }
                             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                         } else {
                             val file = mediaManager.createImageFile()
@@ -292,6 +311,14 @@ fun EditorScreen(
                         showMediaPicker = null
                         saveDraft()
                         if (!cameraPermissionGranted.value) {
+                            pendingMediaAction = {
+                                val file = mediaManager.createVideoFile()
+                                pendingVideoFile = file
+                                val uri = FileProvider.getUriForFile(
+                                    context, "${context.packageName}.fileprovider", file
+                                )
+                                videoLauncher.launch(uri)
+                            }
                             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                         } else {
                             val file = mediaManager.createVideoFile()
@@ -317,6 +344,12 @@ fun EditorScreen(
                         showMediaPicker = null
                         saveDraft()
                         if (!audioPermissionGranted.value) {
+                            pendingMediaAction = {
+                                val file = mediaManager.createVoiceFile()
+                                recordingFile = file
+                                isRecording = true
+                                mediaManager.startRecording(file)
+                            }
                             audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                         } else {
                             val file = mediaManager.createVoiceFile()
