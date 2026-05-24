@@ -21,9 +21,9 @@ interface RecordDao {
     @Query("SELECT * FROM records WHERE dateTime BETWEEN :dayStart AND :dayEnd ORDER BY dateTime DESC")
     fun getByDateRange(dayStart: Long, dayEnd: Long): Flow<List<RecordEntity>>
 
-    @Query("SELECT DISTINCT dateTime / 86400 * 86400 AS dayStart FROM records ORDER BY dayStart DESC")
+    @Query("SELECT DISTINCT dateTime FROM records")
     fun getDistinctDays(): Flow<List<Long>>
 
-    @Query("SELECT * FROM records WHERE dateTime / 86400 * 86400 = :dayStart")
+    @Query("SELECT * FROM records WHERE dateTime >= :dayStart AND dateTime < :dayStart + 86400 ORDER BY dateTime DESC")
     fun getByDay(dayStart: Long): Flow<List<RecordEntity>>
 }
