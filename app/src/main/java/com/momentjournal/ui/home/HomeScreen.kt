@@ -84,9 +84,9 @@ fun HomeScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     EmptyState(
-                        emoji = "🐾",
+                        emoji = "🌸",
                         title = "今天还没有记录哦~",
-                        subtitle = "点击右下角 + 记录此刻吧 ✨"
+                        subtitle = "点右下角 + 记录此刻吧 ✨"
                     )
                 }
             } else {

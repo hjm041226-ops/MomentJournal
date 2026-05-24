@@ -2,15 +2,15 @@ package com.momentjournal.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Cute (default) - Sakura Pink
-val CutePrimary = Color(0xFFFF8FA3)
-val CuteSecondary = Color(0xFFFFB3C1)
-val CuteBackground = Color(0xFFFFFAFA)
+// Cute (default) - Warm Sakura
+val CutePrimary = Color(0xFFF4A0A0)       // softer warm pink
+val CuteSecondary = Color(0xFFFFC8C8)     // light blush
+val CuteBackground = Color(0xFFFFF8F6)    // warm cream white
 val CuteSurface = Color(0xFFFFFFFF)
 val CuteOnPrimary = Color(0xFFFFFFFF)
-val CuteTextPrimary = Color(0xFF6B4E5A)
-val CuteTextSecondary = Color(0xFFA08894)
-val CuteBorder = Color(0xFFFFD4DC)
+val CuteTextPrimary = Color(0xFF6B4E5A)   // warm brown-gray (keep)
+val CuteTextSecondary = Color(0xFFB09898) // warmer gray
+val CuteBorder = Color(0xFFFFE0DC)        // warm border
 
 // Tough - Dark rugged
 val ToughPrimary = Color(0xFF3A3A3A)

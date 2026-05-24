@@ -25,6 +25,15 @@ class EditorViewModel(
     private val _selectedTagIds = MutableStateFlow<List<Long>>(emptyList())
     val selectedTagIds: StateFlow<List<Long>> = _selectedTagIds.asStateFlow()
 
+    private val _blockWidths = MutableStateFlow<Map<Int, Float>>(emptyMap())
+    val blockWidths: StateFlow<Map<Int, Float>> = _blockWidths.asStateFlow()
+
+    fun toggleBlockWidth(index: Int) {
+        val current = _blockWidths.value
+        val currentWidth = current[index] ?: 1f
+        _blockWidths.value = current + (index to if (currentWidth > 0.5f) 0.5f else 1f)
+    }
+
     init {
         if (existingRecordId > 0) {
             viewModelScope.launch {

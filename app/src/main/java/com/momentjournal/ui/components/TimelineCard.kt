@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.momentjournal.data.entity.BlockEntity
@@ -43,7 +44,9 @@ fun TimelineCard(
         MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
 
     Row(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .height(IntrinsicSize.Min),
         verticalAlignment = Alignment.Top
     ) {
         // Time column — fixed width on the left
@@ -52,7 +55,7 @@ fun TimelineCard(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
             fontSize = 12.sp,
-            modifier = Modifier.width(42.dp).padding(top = 6.dp)
+            modifier = Modifier.width(44.dp).padding(top = 10.dp)
         )
 
         // Card content — fills remaining space, with left color stripe
@@ -67,7 +70,7 @@ fun TimelineCard(
                 // Color stripe on the left
                 Box(
                     modifier = Modifier
-                        .width(4.dp)
+                        .width(5.dp)
                         .fillMaxHeight()
                         .background(accentColor)
                 )

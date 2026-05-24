@@ -5,18 +5,16 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,7 +30,7 @@ import com.google.gson.reflect.TypeToken
 import com.momentjournal.util.MediaManager
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EditorScreen(
     navController: androidx.navigation.NavHostController,
@@ -224,100 +222,99 @@ fun EditorScreen(
                 Text("✨ 点击下方工具栏开始记录吧", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), fontSize = 14.sp)
             }
         } else {
-            val listState = rememberLazyListState()
-            var draggedIndex by remember { mutableStateOf(-1) }
-            var dragAccumulated by remember { mutableStateOf(0f) }
+            val scrollState = rememberScrollState()
+            val blockWidths by viewModel.blockWidths.collectAsState()
+            var draggedIndex by remember { mutableIntStateOf(-1) }
+            var dragAccumulatedY by remember { mutableFloatStateOf(0f) }
 
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(16.dp),
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                itemsIndexed(blocks, key = { i, block -> "${block.type}_${block.id}_$i" }) { index, block ->
-                    val isDragging = draggedIndex == index
-                    Row(
-                        modifier = Modifier
-                            .zIndex(if (isDragging) 1f else 0f)
-                            .graphicsLayer {
-                                translationY = if (isDragging) dragAccumulated else 0f
-                                scaleX = if (isDragging) 1.03f else 1f
-                                scaleY = if (isDragging) 1.03f else 1f
-                            },
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        // Drag handle + up/down buttons
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .padding(top = 8.dp)
-                                .pointerInput(index) {
-                                    detectDragGesturesAfterLongPress(
-                                        onDragStart = {
-                                            draggedIndex = index
-                                            dragAccumulated = 0f
-                                        },
-                                        onDragEnd = {
-                                            draggedIndex = -1
-                                            dragAccumulated = 0f
-                                        },
-                                        onDragCancel = {
-                                            draggedIndex = -1
-                                            dragAccumulated = 0f
-                                        },
-                                        onDrag = { change, offset ->
-                                            change.consume()
-                                            dragAccumulated += offset.y
-                                            // Detect swap with neighbor
-                                            val items = listState.layoutInfo.visibleItemsInfo
-                                            val current = items.firstOrNull { it.index == draggedIndex } ?: return@detectDragGesturesAfterLongPress
-                                            val center = current.offset + current.size / 2f + dragAccumulated
-                                            val target = items.firstOrNull { other ->
-                                                other.index != draggedIndex &&
-                                                    center > other.offset &&
-                                                    center < other.offset + other.size
-                                            }
-                                            if (target != null) {
-                                                viewModel.moveBlock(draggedIndex, target.index)
-                                                draggedIndex = target.index
-                                                dragAccumulated = 0f
-                                            }
-                                        }
-                                    )
-                                }
-                        ) {
-                            Text("⠿", fontSize = 18.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
-                                modifier = Modifier.width(28.dp)
-                            )
-                            Text("▲", fontSize = 10.sp,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = if (index > 0) 0.5f else 0.2f),
-                                modifier = Modifier
-                                    .clickable(enabled = index > 0) {
-                                        viewModel.moveBlock(index, index - 1)
-                                    }
-                                    .padding(2.dp)
-                            )
-                            Text("▼", fontSize = 10.sp,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = if (index < blocks.size - 1) 0.5f else 0.2f),
-                                modifier = Modifier
-                                    .clickable(enabled = index < blocks.size - 1) {
-                                        viewModel.moveBlock(index, index + 1)
-                                    }
-                                    .padding(2.dp)
-                            )
-                        }
+                // FlowRow for blocks
+                androidx.compose.foundation.layout.FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    blocks.forEachIndexed { index, block ->
+                        val widthFraction = blockWidths[index] ?: 1f
+                        val isDragging = draggedIndex == index
 
-                        // The block editor itself
-                        Box(modifier = Modifier.weight(1f)) {
-                            BlockEditor(
-                                block = block,
-                                onContentChange = { content -> viewModel.updateBlockContent(index, content) },
-                                onDelete = { viewModel.deleteBlock(index) }
-                            )
+                        Row(
+                            modifier = Modifier
+                                .then(
+                                    if (widthFraction < 1f)
+                                        Modifier.fillMaxWidth(0.48f)
+                                    else
+                                        Modifier.fillMaxWidth()
+                                )
+                                .zIndex(if (isDragging) 1f else 0f)
+                                .graphicsLayer {
+                                    translationY = if (isDragging) dragAccumulatedY else 0f
+                                    scaleX = if (isDragging) 1.03f else 1f
+                                    scaleY = if (isDragging) 1.03f else 1f
+                                },
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            // Left control bar: drag handle + up/down + width toggle
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.padding(top = 6.dp)
+                            ) {
+                                // Width toggle button
+                                Text(
+                                    text = if (widthFraction < 1f) "⤢" else "⤡",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                                    modifier = Modifier
+                                        .clickable { viewModel.toggleBlockWidth(index) }
+                                        .padding(2.dp)
+                                )
+                                // Move up
+                                Text("▲", fontSize = 10.sp,
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = if (index > 0) 0.4f else 0.15f),
+                                    modifier = Modifier
+                                        .clickable(enabled = index > 0) { viewModel.moveBlock(index, index - 1) }
+                                        .padding(2.dp)
+                                )
+                                // Drag handle
+                                Text("⠿", fontSize = 18.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                                    modifier = Modifier.width(24.dp)
+                                )
+                                // Move down
+                                Text("▼", fontSize = 10.sp,
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = if (index < blocks.size - 1) 0.4f else 0.15f),
+                                    modifier = Modifier
+                                        .clickable(enabled = index < blocks.size - 1) { viewModel.moveBlock(index, index + 1) }
+                                        .padding(2.dp)
+                                )
+                            }
+
+                            // The block editor content
+                            Box(modifier = Modifier.weight(1f)) {
+                                BlockEditor(
+                                    block = block,
+                                    onContentChange = { content -> viewModel.updateBlockContent(index, content) },
+                                    onDelete = { viewModel.deleteBlock(index) }
+                                )
+                            }
                         }
                     }
                 }
+
+                // Hint text
+                Text(
+                    "💡 点击 ⤡ 切换半宽/全宽，点击 ▲▼ 调整顺序，长按 ⠿ 拖拽",
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
         }
     }
