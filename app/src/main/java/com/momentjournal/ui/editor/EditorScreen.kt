@@ -21,6 +21,8 @@ import com.momentjournal.ui.components.BlockEditor
 import com.momentjournal.ui.components.TagSelectorDialog
 import com.momentjournal.ui.components.MediaPickerDialog
 import com.momentjournal.util.DateTimeUtil
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.momentjournal.util.MediaManager
 import java.io.File
 
@@ -46,7 +48,58 @@ fun EditorScreen(
     ) { granted ->
         audioPermissionGranted.value = granted
     }
+    val cameraPermissionGranted = remember { mutableStateOf(
+        androidx.core.content.ContextCompat.checkSelfPermission(
+            context, android.Manifest.permission.CAMERA
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    ) }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        cameraPermissionGranted.value = granted
+    }
     val mediaManager = remember { MediaManager(context) }
+
+    // Save blocks to temp file before external intent (protection against process death)
+    fun saveDraft() {
+        val currentBlocks = viewModel.blocks.value
+        if (currentBlocks.isNotEmpty()) {
+            val draftFile = java.io.File(mediaManager.getMediaDir(), "editor_draft.json")
+            val gson = com.google.gson.Gson()
+            draftFile.writeText(gson.toJson(currentBlocks.map {
+                mapOf("type" to it.type.name, "content" to it.content, "sortOrder" to it.sortOrder)
+            }))
+        }
+    }
+
+    // Restore draft on init
+    LaunchedEffect(Unit) {
+        val draftFile = java.io.File(mediaManager.getMediaDir(), "editor_draft.json")
+        if (draftFile.exists() && viewModel.blocks.value.isEmpty()) {
+            try {
+                val gson = com.google.gson.Gson()
+                val json = draftFile.readText()
+                val listType = object : TypeToken<Array<Map<String, Any>>>() {}.type
+                val list = gson.fromJson<Array<Map<String, Any>>>(json, listType)
+                list?.forEach { item ->
+                    val type = com.momentjournal.data.entity.BlockType.valueOf(item["type"] as String)
+                    val content = item["content"] as String
+                    when (type) {
+                        com.momentjournal.data.entity.BlockType.TEXT -> {
+                            viewModel.addTextBlock()
+                            val idx = viewModel.blocks.value.size - 1
+                            if (idx >= 0) viewModel.updateBlockContent(idx, content)
+                        }
+                        com.momentjournal.data.entity.BlockType.IMAGE -> viewModel.addImageBlock(content)
+                        com.momentjournal.data.entity.BlockType.VIDEO -> viewModel.addVideoBlock(content)
+                        com.momentjournal.data.entity.BlockType.VOICE -> viewModel.addVoiceBlock(content)
+                    }
+                }
+                draftFile.delete()
+            } catch (_: Exception) { }
+        }
+    }
     var isRecording by remember { mutableStateOf(false) }
     var recordingFile by remember { mutableStateOf<File?>(null) }
 
@@ -212,15 +265,21 @@ fun EditorScreen(
                     onDismiss = { showMediaPicker = null },
                     onFromCamera = {
                         showMediaPicker = null
-                        val file = mediaManager.createImageFile()
-                        pendingCameraFile = file
-                        val uri = FileProvider.getUriForFile(
-                            context, "${context.packageName}.fileprovider", file
-                        )
-                        cameraLauncher.launch(uri)
+                        saveDraft()
+                        if (!cameraPermissionGranted.value) {
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        } else {
+                            val file = mediaManager.createImageFile()
+                            pendingCameraFile = file
+                            val uri = FileProvider.getUriForFile(
+                                context, "${context.packageName}.fileprovider", file
+                            )
+                            cameraLauncher.launch(uri)
+                        }
                     },
                     onFromGallery = {
                         showMediaPicker = null
+                        saveDraft()
                         galleryLauncher.launch("image/*")
                     }
                 )
@@ -231,15 +290,21 @@ fun EditorScreen(
                     onDismiss = { showMediaPicker = null },
                     onFromCamera = {
                         showMediaPicker = null
-                        val file = mediaManager.createVideoFile()
-                        pendingVideoFile = file
-                        val uri = FileProvider.getUriForFile(
-                            context, "${context.packageName}.fileprovider", file
-                        )
-                        videoLauncher.launch(uri)
+                        saveDraft()
+                        if (!cameraPermissionGranted.value) {
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        } else {
+                            val file = mediaManager.createVideoFile()
+                            pendingVideoFile = file
+                            val uri = FileProvider.getUriForFile(
+                                context, "${context.packageName}.fileprovider", file
+                            )
+                            videoLauncher.launch(uri)
+                        }
                     },
                     onFromGallery = {
                         showMediaPicker = null
+                        saveDraft()
                         videoGalleryLauncher.launch("video/*")
                     }
                 )
@@ -250,6 +315,7 @@ fun EditorScreen(
                     onDismiss = { showMediaPicker = null },
                     onFromCamera = {
                         showMediaPicker = null
+                        saveDraft()
                         if (!audioPermissionGranted.value) {
                             audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                         } else {
@@ -261,6 +327,7 @@ fun EditorScreen(
                     },
                     onFromGallery = {
                         showMediaPicker = null
+                        saveDraft()
                         audioPickerLauncher.launch("audio/*")
                     }
                 )

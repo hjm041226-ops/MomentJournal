@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.momentjournal.data.entity.BlockType
+import coil.compose.AsyncImage
 import com.momentjournal.ui.components.TagChip
 import com.momentjournal.ui.navigation.Routes
 import com.momentjournal.util.DateTimeUtil
@@ -89,52 +90,130 @@ fun DetailScreen(
                         }
                     }
                     BlockType.IMAGE -> {
+                        val filePath = block.content
                         Surface(
                             shape = RoundedCornerShape(14.dp),
                             color = MaterialTheme.colorScheme.surface,
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                         ) {
-                            Box(
-                                modifier = Modifier.fillMaxWidth().heightIn(min = 120.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("🖼 图片", fontSize = 13.sp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("🖼 图片", fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                }
+                                if (filePath.isNotEmpty()) {
+                                    AsyncImage(
+                                        model = java.io.File(filePath),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .heightIn(min = 120.dp, max = 300.dp)
+                                            .padding(horizontal = 12.dp)
+                                            .padding(bottom = 12.dp)
+                                    )
+                                } else {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth().height(120.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("无法加载图片", fontSize = 13.sp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
+                                    }
+                                }
                             }
                         }
                     }
                     BlockType.VIDEO -> {
+                        val fileName = if (block.content.isNotEmpty()) java.io.File(block.content).name else ""
+                        val context = androidx.compose.ui.platform.LocalContext.current
                         Surface(
                             shape = RoundedCornerShape(14.dp),
                             color = MaterialTheme.colorScheme.surface,
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                         ) {
                             Row(
-                                modifier = Modifier.padding(12.dp),
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("🎬 视频", fontSize = 14.sp)
-                                Spacer(modifier = Modifier.weight(1f))
-                                TextButton(onClick = { /* play */ }) {
-                                    Text("▶ 播放", color = MaterialTheme.colorScheme.primary)
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text("🎬", fontSize = 22.sp)
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("视频", fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium)
+                                    if (fileName.isNotEmpty()) {
+                                        Text(fileName, fontSize = 11.sp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                    }
+                                }
+                                TextButton(onClick = {
+                                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                                        setDataAndType(
+                                            androidx.core.content.FileProvider.getUriForFile(
+                                                context, "${context.packageName}.fileprovider",
+                                                java.io.File(block.content)
+                                            ), "video/*"
+                                        )
+                                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                    context.startActivity(intent)
+                                }) {
+                                    Text("▶ 播放", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
                                 }
                             }
                         }
                     }
                     BlockType.VOICE -> {
+                        val fileName = if (block.content.isNotEmpty()) java.io.File(block.content).name else ""
+                        val context = androidx.compose.ui.platform.LocalContext.current
                         Surface(
                             shape = RoundedCornerShape(14.dp),
                             color = MaterialTheme.colorScheme.surface,
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                         ) {
                             Row(
-                                modifier = Modifier.padding(12.dp),
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("🎙 语音", fontSize = 14.sp)
-                                Spacer(modifier = Modifier.weight(1f))
-                                TextButton(onClick = { /* play */ }) {
-                                    Text("▶ 播放", color = MaterialTheme.colorScheme.primary)
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text("🎙", fontSize = 22.sp)
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("语音", fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium)
+                                    if (fileName.isNotEmpty()) {
+                                        Text(fileName, fontSize = 11.sp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                    }
+                                }
+                                TextButton(onClick = {
+                                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                                        setDataAndType(
+                                            androidx.core.content.FileProvider.getUriForFile(
+                                                context, "${context.packageName}.fileprovider",
+                                                java.io.File(block.content)
+                                            ), "audio/*"
+                                        )
+                                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                    context.startActivity(intent)
+                                }) {
+                                    Text("▶ 播放", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
                                 }
                             }
                         }

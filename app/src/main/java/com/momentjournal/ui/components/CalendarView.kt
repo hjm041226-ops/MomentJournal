@@ -99,17 +99,24 @@ fun CalendarView(
         // Day grid
         val totalCells = firstDayOfWeek + days.size
         val rows = (totalCells + 6) / 7
+        val accumulatedDrag = remember { mutableStateOf(0f) }
         Box(
             modifier = Modifier.pointerInput(Unit) {
-                detectHorizontalDragGestures { _, dragAmount ->
-                    if (dragAmount > 80) {
-                        // Swipe right finger → show NEXT month
-                        currentMonth = if (month == 11) year + 1 to 0 else year to month + 1
-                    } else if (dragAmount < -80) {
-                        // Swipe left finger → show PREVIOUS month
-                        currentMonth = if (month == 0) year - 1 to 11 else year to month - 1
+                detectHorizontalDragGestures(
+                    onDragEnd = {
+                        if (accumulatedDrag.value > 40) {
+                            // Swipe right → next month
+                            currentMonth = if (month == 11) year + 1 to 0 else year to month + 1
+                        } else if (accumulatedDrag.value < -40) {
+                            // Swipe left → previous month
+                            currentMonth = if (month == 0) year - 1 to 11 else year to month - 1
+                        }
+                        accumulatedDrag.value = 0f
+                    },
+                    onHorizontalDrag = { _, dragAmount ->
+                        accumulatedDrag.value += dragAmount
                     }
-                }
+                )
             }
         ) {
             Column {
