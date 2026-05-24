@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.momentjournal.ui.components.BlockEditor
+import com.momentjournal.ui.components.TagSelectorDialog
+import com.momentjournal.ui.components.MediaPickerDialog
 import com.momentjournal.util.DateTimeUtil
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,6 +24,7 @@ fun EditorScreen(
     val blocks by viewModel.blocks.collectAsState()
     val dateTime by viewModel.recordDateTime.collectAsState()
     var showTagDialog by remember { mutableStateOf(false) }
+    var showMediaPicker by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -52,8 +55,8 @@ fun EditorScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ToolbarButton("Aa 文字", onClick = { viewModel.addTextBlock() })
-                    ToolbarButton("🖼 图片", onClick = { viewModel.addImageBlock("img_${System.currentTimeMillis()}.jpg") })
-                    ToolbarButton("🎬 视频", onClick = { viewModel.addVideoBlock("vid_${System.currentTimeMillis()}.mp4") })
+                    ToolbarButton("🖼 图片", onClick = { showMediaPicker = true })
+                    ToolbarButton("🎬 视频", onClick = { showMediaPicker = true })
                     ToolbarButton("🎙 录音", onClick = { viewModel.addVoiceBlock("voice_${System.currentTimeMillis()}.m4a") })
                 }
             }
@@ -80,21 +83,29 @@ fun EditorScreen(
         }
     }
 
-    // Placeholder tag dialog until Task 10
     if (showTagDialog) {
-        AlertDialog(
-            onDismissRequest = { showTagDialog = false },
-            title = { Text("选择标签") },
-            text = { Text("标签选择器将在下一步实现") },
-            confirmButton = {
-                TextButton(onClick = {
-                    showTagDialog = false
-                    viewModel.save { navController.popBackStack() }
-                }) {
-                    Text("直接保存")
-                }
+        TagSelectorDialog(
+            selectedTagIds = viewModel.selectedTagIds.collectAsState().value,
+            onToggleTag = { viewModel.toggleTag(it) },
+            onDismiss = { showTagDialog = false },
+            onConfirm = {
+                showTagDialog = false
+                viewModel.save { navController.popBackStack() }
+            }
+        )
+    }
+
+    if (showMediaPicker) {
+        MediaPickerDialog(
+            onDismiss = { showMediaPicker = false },
+            onFromCamera = {
+                showMediaPicker = false
+                viewModel.addImageBlock("img_${System.currentTimeMillis()}.jpg")
             },
-            dismissButton = { TextButton(onClick = { showTagDialog = false }) { Text("取消") } }
+            onFromGallery = {
+                showMediaPicker = false
+                viewModel.addImageBlock("img_${System.currentTimeMillis()}.jpg")
+            }
         )
     }
 }
