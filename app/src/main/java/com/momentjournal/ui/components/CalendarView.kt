@@ -3,6 +3,7 @@ package com.momentjournal.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -42,17 +43,6 @@ fun CalendarView(
     Column(
         modifier = modifier
             .padding(horizontal = 12.dp)
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures { _, dragAmount ->
-                    if (dragAmount > 50) {
-                        // Swipe right — previous month
-                        currentMonth = if (month == 0) year - 1 to 11 else year to month - 1
-                    } else if (dragAmount < -50) {
-                        // Swipe left — next month
-                        currentMonth = if (month == 11) year + 1 to 0 else year to month + 1
-                    }
-                }
-            }
     ) {
         // Month header
         Row(
@@ -109,45 +99,63 @@ fun CalendarView(
         // Day grid
         val totalCells = firstDayOfWeek + days.size
         val rows = (totalCells + 6) / 7
-        for (row in 0 until rows) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                for (col in 0..6) {
-                    val cellIndex = row * 7 + col
-                    val dayIndex = cellIndex - firstDayOfWeek
-                    if (dayIndex in days.indices) {
-                        val dayStart = days[dayIndex]
-                        val isSelected = dayStart == selectedDayStart
-                        val hasRecords = dayStart in daysWithRecords
-                        val dayOfMonth = Calendar.getInstance().apply {
-                            timeInMillis = dayStart * 1000
-                        }.get(Calendar.DAY_OF_MONTH)
+        Box(
+            modifier = Modifier.pointerInput(Unit) {
+                detectHorizontalDragGestures { _, dragAmount ->
+                    if (dragAmount > 80) {
+                        // Swipe right finger → show NEXT month
+                        currentMonth = if (month == 11) year + 1 to 0 else year to month + 1
+                    } else if (dragAmount < -80) {
+                        // Swipe left finger → show PREVIOUS month
+                        currentMonth = if (month == 0) year - 1 to 11 else year to month - 1
+                    }
+                }
+            }
+        ) {
+            Column {
+                for (row in 0 until rows) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        for (col in 0..6) {
+                            val cellIndex = row * 7 + col
+                            val dayIndex = cellIndex - firstDayOfWeek
+                            if (dayIndex in days.indices) {
+                                val dayStart = days[dayIndex]
+                                val isSelected = dayStart == selectedDayStart
+                                val hasRecords = dayStart in daysWithRecords
+                                val dayOfMonth = Calendar.getInstance().apply {
+                                    timeInMillis = dayStart * 1000
+                                }.get(Calendar.DAY_OF_MONTH)
 
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .padding(2.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (isSelected) MaterialTheme.colorScheme.primary
-                                    else if (hasRecords) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                    else MaterialTheme.colorScheme.surface
-                                )
-                                .clickable { onDaySelected(dayStart) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = dayOfMonth.toString(),
-                                fontSize = 13.sp,
-                                color = if (isSelected)
-                                    MaterialTheme.colorScheme.onPrimary
-                                else
-                                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .aspectRatio(1f)
+                                        .padding(2.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (isSelected) MaterialTheme.colorScheme.primary
+                                            else if (hasRecords) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                            else MaterialTheme.colorScheme.surface
+                                        )
+                                        .pointerInput(dayStart) {
+                                            detectTapGestures(onTap = { onDaySelected(dayStart) })
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = dayOfMonth.toString(),
+                                        fontSize = 13.sp,
+                                        color = if (isSelected)
+                                            MaterialTheme.colorScheme.onPrimary
+                                        else
+                                            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.weight(1f).aspectRatio(1f))
+                            }
                         }
-                    } else {
-                        Spacer(modifier = Modifier.weight(1f).aspectRatio(1f))
                     }
                 }
             }

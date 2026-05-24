@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.momentjournal.data.entity.BlockEntity
 import com.momentjournal.data.entity.BlockType
 
@@ -71,21 +72,41 @@ fun BlockEditor(
         }
 
         BlockType.IMAGE -> {
+            val filePath = block.content
             Surface(
                 modifier = modifier.fillMaxWidth().border(1.5.dp, SolidColor(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)), shape),
                 shape = shape,
                 color = MaterialTheme.colorScheme.surface
             ) {
-                Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("🖼 图片", fontSize = 13.sp)
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text("✕", modifier = Modifier.clickable(onClick = onDelete).padding(4.dp),
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("🖼 图片", fontSize = 13.sp)
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text("✕", modifier = Modifier.clickable(onClick = onDelete).padding(4.dp),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+                    }
+                    if (filePath.isNotEmpty()) {
+                        AsyncImage(
+                            model = java.io.File(filePath),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 200.dp)
+                                .padding(horizontal = 12.dp)
+                                .padding(bottom = 12.dp),
+                        )
+                    }
                 }
             }
         }
 
         BlockType.VIDEO -> {
+            val fileName = block.content.let { path ->
+                if (path.isNotEmpty()) java.io.File(path).name else ""
+            }
             Surface(
                 modifier = modifier.fillMaxWidth().border(1.5.dp, SolidColor(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)), shape),
                 shape = shape,
@@ -93,8 +114,9 @@ fun BlockEditor(
             ) {
                 Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("🎬 视频", fontSize = 13.sp)
-                    if (block.content.isNotEmpty()) {
-                        Text(" ${block.content}", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                    if (fileName.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(fileName, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     Text("✕", modifier = Modifier.clickable(onClick = onDelete).padding(4.dp),

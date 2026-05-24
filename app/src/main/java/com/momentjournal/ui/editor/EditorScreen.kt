@@ -1,5 +1,6 @@
 package com.momentjournal.ui.editor
 
+import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,6 +35,17 @@ fun EditorScreen(
     var showTagDialog by remember { mutableStateOf(false) }
     var showMediaPicker by remember { mutableStateOf<BlockType?>(null) }
     val context = LocalContext.current
+    val audioPermissionGranted = remember { mutableStateOf(
+        androidx.core.content.ContextCompat.checkSelfPermission(
+            context, android.Manifest.permission.RECORD_AUDIO
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    ) }
+
+    val audioPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        audioPermissionGranted.value = granted
+    }
     val mediaManager = remember { MediaManager(context) }
     var isRecording by remember { mutableStateOf(false) }
     var recordingFile by remember { mutableStateOf<File?>(null) }
@@ -196,6 +208,7 @@ fun EditorScreen(
         when (mediaType) {
             BlockType.IMAGE -> {
                 MediaPickerDialog(
+                    mediaType = BlockType.IMAGE,
                     onDismiss = { showMediaPicker = null },
                     onFromCamera = {
                         showMediaPicker = null
@@ -214,6 +227,7 @@ fun EditorScreen(
             }
             BlockType.VIDEO -> {
                 MediaPickerDialog(
+                    mediaType = BlockType.VIDEO,
                     onDismiss = { showMediaPicker = null },
                     onFromCamera = {
                         showMediaPicker = null
@@ -232,14 +246,18 @@ fun EditorScreen(
             }
             BlockType.VOICE -> {
                 MediaPickerDialog(
+                    mediaType = BlockType.VOICE,
                     onDismiss = { showMediaPicker = null },
                     onFromCamera = {
                         showMediaPicker = null
-                        // Start instant recording
-                        val file = mediaManager.createVoiceFile()
-                        recordingFile = file
-                        isRecording = true
-                        mediaManager.startRecording(file)
+                        if (!audioPermissionGranted.value) {
+                            audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                        } else {
+                            val file = mediaManager.createVoiceFile()
+                            recordingFile = file
+                            isRecording = true
+                            mediaManager.startRecording(file)
+                        }
                     },
                     onFromGallery = {
                         showMediaPicker = null
