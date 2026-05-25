@@ -18,9 +18,9 @@ Unlike a traditional one-entry-per-day diary, **Moment Journal** supports multip
 
 ## Screenshots
 
-| Home | Editor | Detail | Themes |
+| Home | Themes | Tags | Editor |
 |------|--------|--------|--------|
-| ![Home](screenshots/01-home-calendar.jpg) | ![Editor](screenshots/02-editor.jpg) | ![Detail](screenshots/03-detail.jpg) | ![Themes](screenshots/04-themes.jpg) |
+| ![Home](screenshots/01-home-calendar.jpg) | ![Themes](screenshots/02-editor.jpg) | ![Tags](screenshots/03-detail.jpg) | ![Editor](screenshots/04-themes.jpg) |
 
 ## Download
 
