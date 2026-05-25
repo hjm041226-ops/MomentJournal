@@ -1,5 +1,6 @@
 package com.momentjournal.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -26,32 +27,50 @@ fun BlockEditor(
 ) {
     when (block.type) {
         BlockType.TEXT -> {
+            var isEditing by remember { mutableStateOf(false) }
             var text by remember(block.id, block.content) { mutableStateOf(block.content) }
+
             Surface(
-                modifier = modifier.fillMaxWidth(),
+                modifier = modifier
+                    .fillMaxWidth()
+                    .clickable { isEditing = true },
                 shape = RoundedCornerShape(16.dp),
                 color = bubbleColor
             ) {
-                BasicTextField(
-                    value = text,
-                    onValueChange = { newText ->
-                        text = newText
-                        onContentChange(newText)
-                    },
-                    modifier = Modifier.padding(14.dp).fillMaxWidth(),
-                    textStyle = TextStyle(
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        lineHeight = 22.sp
-                    ),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    decorationBox = { innerTextField ->
-                        if (text.isEmpty()) {
-                            Text("输入文字...", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f), fontSize = 14.sp)
+                if (isEditing) {
+                    BasicTextField(
+                        value = text,
+                        onValueChange = { newText ->
+                            text = newText
+                            onContentChange(newText)
+                        },
+                        modifier = Modifier.padding(14.dp).fillMaxWidth(),
+                        textStyle = TextStyle(
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            lineHeight = 22.sp
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        singleLine = false,
+                        decorationBox = { innerTextField ->
+                            if (text.isEmpty()) {
+                                Text("输入文字...", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f), fontSize = 14.sp)
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
-                    }
-                )
+                    )
+                } else {
+                    Text(
+                        text = if (text.isNotEmpty()) text else "输入文字...",
+                        modifier = Modifier.padding(14.dp),
+                        fontSize = 14.sp,
+                        lineHeight = 22.sp,
+                        color = if (text.isNotEmpty())
+                            MaterialTheme.colorScheme.onSurface
+                        else
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                    )
+                }
             }
         }
 

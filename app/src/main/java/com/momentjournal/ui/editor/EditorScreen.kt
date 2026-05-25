@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.clickable
@@ -13,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.material3.*
-import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +34,7 @@ import com.google.gson.reflect.TypeToken
 import com.momentjournal.util.MediaManager
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(
     navController: androidx.navigation.NavHostController,
@@ -250,118 +248,122 @@ fun EditorScreen(
                     .padding(horizontal = 10.dp, vertical = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                androidx.compose.foundation.layout.FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    blocks.forEachIndexed { index, block ->
-                        val scale = bubbleScales[index] ?: 1f
-                        val isDragging = draggedIndex == index
+                // Custom row-based layout: equal width within each row, uniform height
+                val bubbleSpacing = 8.dp
 
-                        // Each bubble with gesture support
-                        Box(
-                            modifier = Modifier
-                                .zIndex(if (isDragging) 10f else 0f)
-                                .graphicsLayer {
-                                    scaleX = scale * if (isDragging) 1.05f else 1f
-                                    scaleY = scale * if (isDragging) 1.05f else 1f
-                                    translationX = if (isDragging) dragOffsetX else 0f
-                                    translationY = if (isDragging) dragOffsetY else 0f
-                                    shadowElevation = if (isDragging) 8f else 1f
-                                }
-                                // Pinch-to-resize gesture
-                                .pointerInput(index) {
-                                    detectTransformGestures { _, _, zoom, _ ->
-                                        if (draggedIndex < 0) {
-                                            // Only resize when not already dragging
-                                            val newScale = ((bubbleScales[index] ?: 1f) * zoom)
-                                                .coerceIn(0.5f, 2f)
-                                            viewModel.updateBubbleScale(index, newScale)
-                                        }
+                // Calculate rows: greedy fill, 2 items per row
+                val rows = remember(blocks) {
+                    val result = mutableListOf<MutableList<Int>>()
+                    var currentRow = mutableListOf<Int>()
+                    result.add(currentRow)
+                    blocks.forEachIndexed { index, _ ->
+                        currentRow.add(index)
+                        if (currentRow.size >= 2) {
+                            currentRow = mutableListOf()
+                            result.add(currentRow)
+                        }
+                    }
+                    result.filter { it.isNotEmpty() }
+                }
+
+                rows.forEach { rowIndices ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                        horizontalArrangement = Arrangement.spacedBy(bubbleSpacing)
+                    ) {
+                        rowIndices.forEach row@{ index ->
+                            val block = blocks.getOrNull(index) ?: return@row
+                            val isDragging = draggedIndex == index
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .zIndex(if (isDragging) 10f else 0f)
+                                    .graphicsLayer {
+                                        translationX = if (isDragging) dragOffsetX else 0f
+                                        translationY = if (isDragging) dragOffsetY else 0f
+                                        shadowElevation = if (isDragging) 8f else 0f
                                     }
-                                }
-                                // Long-press drag gesture
-                                .pointerInput(index) {
-                                    detectDragGesturesAfterLongPress(
-                                        onDragStart = {
-                                            draggedIndex = index
-                                            dragOffsetX = 0f
-                                            dragOffsetY = 0f
-                                        },
-                                        onDragEnd = {
-                                            // Auto-arrange: determine new index based on drag offset
-                                            val itemsPerRow = 3  // approximate
-                                            val rowShift = (dragOffsetY / 80f).roundToInt()
-                                            val colShift = (dragOffsetX / 120f).roundToInt()
-                                            val indexShift = rowShift * itemsPerRow + colShift
-                                            val targetIndex = (index + indexShift).coerceIn(0, blocks.size - 1)
-                                            if (targetIndex != index) {
-                                                viewModel.moveBlock(index, targetIndex)
+                                    .pointerInput(index) {
+                                        detectTransformGestures { _, _, zoom, _ ->
+                                            if (draggedIndex < 0) {
+                                                val newScale = ((bubbleScales[index] ?: 1f) * zoom).coerceIn(0.5f, 2f)
+                                                viewModel.updateBubbleScale(index, newScale)
                                             }
-                                            draggedIndex = -1
-                                            dragOffsetX = 0f
-                                            dragOffsetY = 0f
-                                        },
-                                        onDragCancel = {
-                                            draggedIndex = -1
-                                            dragOffsetX = 0f
-                                            dragOffsetY = 0f
-                                        },
-                                        onDrag = { change, offset ->
-                                            change.consume()
-                                            dragOffsetX += offset.x
-                                            dragOffsetY += offset.y
                                         }
-                                    )
-                                }
-                        ) {
-                            // Bubble card
-                            androidx.compose.material3.Card(
-                                modifier = Modifier,
-                                shape = RoundedCornerShape(20.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surface
-                                ),
-                                elevation = CardDefaults.cardElevation(
-                                    defaultElevation = if (isDragging) 6.dp else 1.dp
-                                )
-                            ) {
-                                Box(modifier = Modifier.padding(4.dp)) {
-                                    // Delete button — subtle X in top-right corner
-                                    Text(
-                                        "✕",
-                                        fontSize = 11.sp,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
-                                        modifier = Modifier
-                                            .align(Alignment.TopEnd)
-                                            .clickable { viewModel.deleteBlock(index) }
-                                            .padding(4.dp)
-                                    )
-
-                                    // Bubble type label
-                                    val bubbleColor = when (block.type) {
-                                        com.momentjournal.data.entity.BlockType.TEXT -> Color(0xFFFFF0F0)
-                                        com.momentjournal.data.entity.BlockType.IMAGE -> Color(0xFFF0F4FF)
-                                        com.momentjournal.data.entity.BlockType.VIDEO -> Color(0xFFF0FFF4)
-                                        com.momentjournal.data.entity.BlockType.VOICE -> Color(0xFFFFF8F0)
                                     }
+                                    .pointerInput(index) {
+                                        detectDragGesturesAfterLongPress(
+                                            onDragStart = {
+                                                draggedIndex = index
+                                                dragOffsetX = 0f
+                                                dragOffsetY = 0f
+                                            },
+                                            onDragEnd = {
+                                                val rowShift = (dragOffsetY / 80f).roundToInt()
+                                                val colShift = (dragOffsetX / 120f).roundToInt()
+                                                val indexShift = rowShift * 2 + colShift
+                                                val targetIndex = (index + indexShift).coerceIn(0, blocks.size - 1)
+                                                if (targetIndex != index) {
+                                                    viewModel.moveBlock(index, targetIndex)
+                                                }
+                                                draggedIndex = -1
+                                                dragOffsetX = 0f
+                                                dragOffsetY = 0f
+                                            },
+                                            onDragCancel = {
+                                                draggedIndex = -1
+                                                dragOffsetX = 0f
+                                                dragOffsetY = 0f
+                                            },
+                                            onDrag = { change, offset ->
+                                                change.consume()
+                                                dragOffsetX += offset.x
+                                                dragOffsetY += offset.y
+                                            }
+                                        )
+                                    }
+                            ) {
+                                val bubbleColor = when (block.type) {
+                                    com.momentjournal.data.entity.BlockType.TEXT -> Color(0xFFFFF0F0)
+                                    com.momentjournal.data.entity.BlockType.IMAGE -> Color(0xFFF0F4FF)
+                                    com.momentjournal.data.entity.BlockType.VIDEO -> Color(0xFFF0FFF4)
+                                    com.momentjournal.data.entity.BlockType.VOICE -> Color(0xFFFFF8F0)
+                                }
 
-                                    BlockEditor(
-                                        block = block,
-                                        onContentChange = { content -> viewModel.updateBlockContent(index, content) },
-                                        onDelete = { viewModel.deleteBlock(index) },
-                                        bubbleColor = bubbleColor
-                                    )
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shadowElevation = if (isDragging) 4.dp else 0.dp
+                                ) {
+                                    Box {
+                                        Text(
+                                            "✕", fontSize = 11.sp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .clickable { viewModel.deleteBlock(index) }
+                                                .padding(4.dp)
+                                        )
+                                        BlockEditor(
+                                            block = block,
+                                            onContentChange = { content -> viewModel.updateBlockContent(index, content) },
+                                            onDelete = { viewModel.deleteBlock(index) },
+                                            bubbleColor = bubbleColor
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
+                    // Spacer between rows
+                    Spacer(modifier = Modifier.height(bubbleSpacing))
                 }
 
                 // Hint
                 Text(
-                    "💡 双指缩放气泡 · 长按拖拽排序 · 松手自动排列",
+                    "💡 长按拖拽排序 · 松手自动排列 · 点击文字气泡可编辑",
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
                     modifier = Modifier.padding(top = 12.dp)
