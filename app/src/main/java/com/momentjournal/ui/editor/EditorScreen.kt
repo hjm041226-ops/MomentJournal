@@ -76,6 +76,12 @@ fun EditorScreen(
         }
     }
 
+    // Delete draft file (call on submit or cancel)
+    fun clearDraft() {
+        val draftFile = java.io.File(mediaManager.getMediaDir(), "editor_draft.json")
+        if (draftFile.exists()) draftFile.delete()
+    }
+
     // Save blocks to temp file before external intent (protection against process death)
     fun saveDraft() {
         val currentBlocks = viewModel.blocks.value
@@ -186,7 +192,7 @@ fun EditorScreen(
             TopAppBar(
                 title = { Text(DateTimeUtil.formatDate(dateTime) + " " + DateTimeUtil.formatTime(dateTime), fontSize = 14.sp) },
                 navigationIcon = {
-                    TextButton(onClick = { navController.popBackStack() }) {
+                    TextButton(onClick = { clearDraft(); navController.popBackStack() }) {
                         Text("取消", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                     }
                 },
@@ -347,6 +353,7 @@ fun EditorScreen(
             onDismiss = { showTagDialog = false },
             onConfirm = {
                 showTagDialog = false
+                clearDraft()
                 viewModel.save { navController.popBackStack() }
             }
         )

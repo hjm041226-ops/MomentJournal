@@ -87,15 +87,21 @@ fun TimelineCard(
                     if (imageBlocks.isNotEmpty() || hasVideo || hasVoice) {
                         Spacer(modifier = Modifier.height(6.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            imageBlocks.take(3).forEach { _ ->
-                                MediaThumbnail(type = BlockType.IMAGE)
+                            imageBlocks.take(3).forEach { block ->
+                                MediaThumbnail(type = BlockType.IMAGE, filePath = block.content)
                             }
                             if (imageBlocks.size > 3) {
                                 Text("+${imageBlocks.size - 3}", fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                             }
-                            if (hasVideo) MediaThumbnail(type = BlockType.VIDEO)
-                            if (hasVoice) MediaThumbnail(type = BlockType.VOICE)
+                            if (hasVideo) {
+                                val vid = blocks.firstOrNull { it.type == BlockType.VIDEO }
+                                MediaThumbnail(type = BlockType.VIDEO, filePath = vid?.content ?: "")
+                            }
+                            if (hasVoice) {
+                                val aud = blocks.firstOrNull { it.type == BlockType.VOICE }
+                                MediaThumbnail(type = BlockType.VOICE, filePath = aud?.content ?: "")
+                            }
                         }
                     }
                     if (tags.isNotEmpty()) {
