@@ -267,8 +267,9 @@ fun EditorScreen(
                 }
 
                 rows.forEach { rowIndices ->
+                    val fraction = 1f / rowIndices.size.coerceAtLeast(1)
                     Row(
-                        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(bubbleSpacing)
                     ) {
                         rowIndices.forEach row@{ index ->
@@ -277,7 +278,8 @@ fun EditorScreen(
 
                             Box(
                                 modifier = Modifier
-                                    .weight(1f)
+                                    .fillMaxWidth(fraction)
+                                    .fillMaxHeight()
                                     .zIndex(if (isDragging) 10f else 0f)
                                     .graphicsLayer {
                                         translationX = if (isDragging) dragOffsetX else 0f
@@ -339,8 +341,8 @@ fun EditorScreen(
                                 ) {
                                     Box {
                                         Text(
-                                            "✕", fontSize = 11.sp,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                                            "✕", fontSize = 12.sp,
+                                            color = Color(0xFF6B4E5A),
                                             modifier = Modifier
                                                 .align(Alignment.TopEnd)
                                                 .clickable { viewModel.deleteBlock(index) }
