@@ -15,9 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.momentjournal.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +34,7 @@ fun ThemePickerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("🎨 选择主题", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.theme_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     TextButton(onClick = onBack) { Text("←") }
                 }
@@ -43,7 +46,7 @@ fun ThemePickerScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
-                Text("✨ 挑选你喜欢的风格",
+                Text(stringResource(R.string.theme_subtitle),
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                     modifier = Modifier.padding(bottom = 4.dp))
@@ -72,10 +75,10 @@ fun ThemePickerScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(theme.label, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                                Text(AppThemeType.label(theme, LocalContext.current), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    themeDescription(theme),
+                                    AppThemeType.description(theme, LocalContext.current),
                                     fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                 )
@@ -129,12 +132,3 @@ private fun themePreviewColors(theme: AppThemeType): List<Color> {
     }
 }
 
-private fun themeDescription(theme: AppThemeType): String {
-    return when (theme) {
-        AppThemeType.CUTE -> "温暖樱花粉，柔和舒适"
-        AppThemeType.TOUGH -> "暗黑硬朗，棱角分明"
-        AppThemeType.SUNSHINE -> "暖黄明亮，阳光活力"
-        AppThemeType.COOL -> "极简灰蓝，冷静克制"
-        AppThemeType.QUIRKY -> "撞色跳跃，有趣搞怪"
-    }
-}

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">随时记</string>
+    <!-- Home -->
+    <string name="home_empty_title">今天还没有记录哦~</string>
+    <string name="home_empty_subtitle">点右下角 + 记录此刻吧 ✨</string>
+    <string name="home_tags">🏷 标签</string>
+    <!-- Editor -->
+    <string name="editor_cancel">取消</string>
+    <string name="editor_submit">提交</string>
+    <string name="editor_text_btn">Aa 文字</string>
+    <string name="editor_image_btn">🖼 图片</string>
+    <string name="editor_video_btn">🎬 视频</string>
+    <string name="editor_voice_btn">🎙 录音</string>
+    <string name="editor_empty_hint">✨ 点击下方工具栏开始记录吧</string>
+    <string name="editor_drag_hint">💡 长按拖拽合并到同行 · 双指缩放 · 点击空白处关闭编辑</string>
+    <string name="editor_placeholder">输入文字…</string>
+    <string name="editor_recording_title">🔴 正在录音…</string>
+    <string name="editor_recording_hint">点击停止完成录音</string>
+    <string name="editor_stop_recording">停止录音</string>
+    <!-- Media Picker -->
+    <string name="media_image_title">添加图片</string>
+    <string name="media_image_camera">📷 拍摄照片</string>
+    <string name="media_image_gallery">🖼 从相册选择</string>
+    <string name="media_video_title">添加视频</string>
+    <string name="media_video_camera">🎬 拍摄视频</string>
+    <string name="media_video_gallery">🎞 从相册选择</string>
+    <string name="media_voice_title">添加录音</string>
+    <string name="media_voice_record">🎙 即时录音</string>
+    <string name="media_voice_file">📁 选取音频文件</string>
+    <string name="media_cancel">取消</string>
+    <!-- Tag Selector -->
+    <string name="tag_selector_title">✨ 给这一刻贴上标签吧</string>
+    <string name="tag_new_placeholder">💬 创建新标签…</string>
+    <string name="tag_add">+ 添加</string>
+    <string name="tag_selected_count">已选: %d 个标签</string>
+    <string name="tag_save">🎉 保存记录</string>
+    <string name="tag_cancel">取消</string>
+    <!-- Detail -->
+    <string name="detail_edit">✎ 编辑</string>
+    <string name="detail_image">🖼 图片</string>
+    <string name="detail_image_error">无法加载图片</string>
+    <string name="detail_video">视频</string>
+    <string name="detail_voice">语音</string>
+    <string name="detail_play">▶ 播放</string>
+    <string name="detail_delete_title">确认删除</string>
+    <string name="detail_delete_msg">删除后无法恢复，确定要删除这条记录吗？</string>
+    <string name="detail_delete_confirm">删除</string>
+    <string name="detail_cancel">取消</string>
+    <!-- Tag Manage -->
+    <string name="tag_manage_title">🏷 标签管理</string>
+    <string name="tag_preset">⭐ 预设标签</string>
+    <string name="tag_custom">💬 自定义标签</string>
+    <string name="tag_new_input_placeholder">💬 新建标签…</string>
+    <string name="tag_add_btn">添加</string>
+    <!-- Theme -->
+    <string name="theme_title">🎨 选择主题</string>
+    <string name="theme_subtitle">✨ 挑选你喜欢的风格</string>
+    <string name="theme_cute">可爱风</string>
+    <string name="theme_tough">硬汉风</string>
+    <string name="theme_sunshine">阳光风</string>
+    <string name="theme_cool">抽象风</string>
+    <string name="theme_quirky">搞怪风</string>
+    <string name="theme_cute_desc">温暖樱花粉，柔和舒适</string>
+    <string name="theme_tough_desc">暗黑硬朗，棱角分明</string>
+    <string name="theme_sunshine_desc">暖黄明亮，阳光活力</string>
+    <string name="theme_cool_desc">极简灰蓝，冷静克制</string>
+    <string name="theme_quirky_desc">撞色跳跃，有趣搞怪</string>
+    <!-- Block types -->
+    <string name="block_image">🖼 图片</string>
+    <string name="block_video">视频</string>
+    <string name="block_voice">语音</string>
+</resources>

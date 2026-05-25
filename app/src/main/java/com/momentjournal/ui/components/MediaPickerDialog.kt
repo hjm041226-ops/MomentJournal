@@ -6,9 +6,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.momentjournal.R
 import com.momentjournal.data.entity.BlockType
 
 @Composable
@@ -19,10 +21,10 @@ fun MediaPickerDialog(
     onFromGallery: () -> Unit
 ) {
     val (title, option1, option2) = when (mediaType) {
-        BlockType.IMAGE -> Triple("添加图片", "📷 拍摄照片", "🖼 从相册选择")
-        BlockType.VIDEO -> Triple("添加视频", "🎬 拍摄视频", "🎞 从相册选择")
-        BlockType.VOICE -> Triple("添加录音", "🎙 即时录音", "📁 选取音频文件")
-        else -> Triple("选择来源", "拍摄", "从相册选择")
+        BlockType.IMAGE -> Triple(stringResource(R.string.media_image_title), stringResource(R.string.media_image_camera), stringResource(R.string.media_image_gallery))
+        BlockType.VIDEO -> Triple(stringResource(R.string.media_video_title), stringResource(R.string.media_video_camera), stringResource(R.string.media_video_gallery))
+        BlockType.VOICE -> Triple(stringResource(R.string.media_voice_title), stringResource(R.string.media_voice_record), stringResource(R.string.media_voice_file))
+        else -> Triple(stringResource(R.string.media_image_title), stringResource(R.string.media_image_camera), stringResource(R.string.media_image_gallery))
     }
 
     AlertDialog(
@@ -48,6 +50,6 @@ fun MediaPickerDialog(
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.media_cancel)) } }
     )
 }

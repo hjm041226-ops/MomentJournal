@@ -13,14 +13,14 @@ val CuteTextSecondary = Color(0xFFB09898) // warmer gray
 val CuteBorder = Color(0xFFFFE0DC)        // warm border
 
 // Tough - Dark rugged
-val ToughPrimary = Color(0xFF3A3A3A)
-val ToughSecondary = Color(0xFF8B4513)
+val ToughPrimary = Color(0xFFB0B0B0)
+val ToughSecondary = Color(0xFFD4A574)
 val ToughBackground = Color(0xFF1A1A1A)
 val ToughSurface = Color(0xFF2D2D2D)
-val ToughOnPrimary = Color(0xFFFFFFFF)
-val ToughTextPrimary = Color(0xFFE0E0E0)
-val ToughTextSecondary = Color(0xFF9E9E9E)
-val ToughBorder = Color(0xFF555555)
+val ToughOnPrimary = Color(0xFF1A1A1A)
+val ToughTextPrimary = Color(0xFFF0F0F0)
+val ToughTextSecondary = Color(0xFFBBBBBB)
+val ToughBorder = Color(0xFF666666)
 
 // Sunshine - Warm bright
 val SunPrimary = Color(0xFFFFA726)

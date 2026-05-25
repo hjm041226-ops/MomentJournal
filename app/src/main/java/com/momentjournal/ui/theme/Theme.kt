@@ -7,16 +7,37 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.momentjournal.R
 import kotlinx.coroutines.flow.map
 
 val Context.themeDataStore by preferencesDataStore(name = "theme")
 
-enum class AppThemeType(val label: String) {
-    CUTE("可爱风"),
-    TOUGH("硬汉风"),
-    SUNSHINE("阳光风"),
-    COOL("抽象风"),
-    QUIRKY("搞怪风")
+enum class AppThemeType {
+    CUTE, TOUGH, SUNSHINE, COOL, QUIRKY;
+
+    companion object {
+        fun label(theme: AppThemeType, context: android.content.Context): String {
+            val resId = when (theme) {
+                CUTE -> R.string.theme_cute
+                TOUGH -> R.string.theme_tough
+                SUNSHINE -> R.string.theme_sunshine
+                COOL -> R.string.theme_cool
+                QUIRKY -> R.string.theme_quirky
+            }
+            return context.getString(resId)
+        }
+
+        fun description(theme: AppThemeType, context: android.content.Context): String {
+            val resId = when (theme) {
+                CUTE -> R.string.theme_cute_desc
+                TOUGH -> R.string.theme_tough_desc
+                SUNSHINE -> R.string.theme_sunshine_desc
+                COOL -> R.string.theme_cool_desc
+                QUIRKY -> R.string.theme_quirky_desc
+            }
+            return context.getString(resId)
+        }
+    }
 }
 
 private data class ThemeColors(
@@ -61,17 +82,35 @@ fun MomentJournalTheme(
     content: @Composable () -> Unit
 ) {
     val colors = themeColorMap[themeType]!!
+    val isDark = themeType == AppThemeType.TOUGH
 
-    val colorScheme = lightColorScheme(
-        primary = colors.primary,
-        secondary = colors.secondary,
-        background = colors.background,
-        surface = colors.surface,
-        onPrimary = colors.onPrimary,
-        onBackground = colors.textPrimary,
-        onSurface = colors.textPrimary,
-        outline = colors.border
-    )
+    val colorScheme = if (isDark) {
+        darkColorScheme(
+            primary = colors.primary,
+            secondary = colors.secondary,
+            background = colors.background,
+            surface = colors.surface,
+            onPrimary = colors.onPrimary,
+            onBackground = colors.textPrimary,
+            onSurface = colors.textPrimary,
+            outline = colors.border,
+            surfaceVariant = colors.surface,
+            onSurfaceVariant = colors.textSecondary
+        )
+    } else {
+        lightColorScheme(
+            primary = colors.primary,
+            secondary = colors.secondary,
+            background = colors.background,
+            surface = colors.surface,
+            onPrimary = colors.onPrimary,
+            onBackground = colors.textPrimary,
+            onSurface = colors.textPrimary,
+            outline = colors.border,
+            surfaceVariant = colors.surface,
+            onSurfaceVariant = colors.textSecondary
+        )
+    }
 
     MaterialTheme(
         colorScheme = colorScheme,

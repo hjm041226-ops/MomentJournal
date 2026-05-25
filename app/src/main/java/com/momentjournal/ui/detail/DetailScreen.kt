@@ -9,8 +9,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.momentjournal.R
 import com.momentjournal.data.entity.BlockType
 import coil.compose.AsyncImage
 import com.momentjournal.ui.components.TagChip
@@ -47,7 +49,7 @@ fun DetailScreen(
                     TextButton(onClick = {
                         navController.navigate(Routes.editor(recordId))
                     }) {
-                        Text("✎ 编辑", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
+                        Text(stringResource(R.string.detail_edit), color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
                     }
                     TextButton(onClick = { showDeleteConfirm = true }) {
                         Text("🗑", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
@@ -101,7 +103,7 @@ fun DetailScreen(
                                     modifier = Modifier.fillMaxWidth().padding(12.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("🖼 图片", fontSize = 13.sp,
+                                    Text(stringResource(R.string.detail_image), fontSize = 13.sp,
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                                 }
                                 if (filePath.isNotEmpty()) {
@@ -119,7 +121,7 @@ fun DetailScreen(
                                         modifier = Modifier.fillMaxWidth().height(120.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text("无法加载图片", fontSize = 13.sp,
+                                        Text(stringResource(R.string.detail_image_error), fontSize = 13.sp,
                                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
                                     }
                                 }
@@ -149,7 +151,7 @@ fun DetailScreen(
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text("视频", fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium)
+                                    Text(stringResource(R.string.detail_video), fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium)
                                     if (fileName.isNotEmpty()) {
                                         Text(fileName, fontSize = 11.sp,
                                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
@@ -167,7 +169,7 @@ fun DetailScreen(
                                     }
                                     context.startActivity(intent)
                                 }) {
-                                    Text("▶ 播放", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
+                                    Text(stringResource(R.string.detail_play), color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
                                 }
                             }
                         }
@@ -195,7 +197,7 @@ fun DetailScreen(
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text("语音", fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium)
+                                    Text(stringResource(R.string.detail_voice), fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium)
                                     if (fileName.isNotEmpty()) {
                                         Text(fileName, fontSize = 11.sp,
                                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
@@ -213,7 +215,7 @@ fun DetailScreen(
                                     }
                                     context.startActivity(intent)
                                 }) {
-                                    Text("▶ 播放", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
+                                    Text(stringResource(R.string.detail_play), color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
                                 }
                             }
                         }
@@ -226,18 +228,18 @@ fun DetailScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("确认删除") },
-            text = { Text("删除后无法恢复，确定要删除这条记录吗？") },
+            title = { Text(stringResource(R.string.detail_delete_title)) },
+            text = { Text(stringResource(R.string.detail_delete_msg)) },
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteConfirm = false
                     viewModel.delete { navController.popBackStack() }
                 }) {
-                    Text("删除", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.detail_delete_confirm), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("取消") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.detail_cancel)) }
             }
         )
     }

@@ -19,11 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.core.content.FileProvider
+import com.momentjournal.R
 import com.momentjournal.data.entity.BlockType
 import com.momentjournal.ui.components.BlockEditor
 import com.momentjournal.ui.components.TagSelectorDialog
@@ -198,14 +200,14 @@ fun EditorScreen(
                 title = { Text(DateTimeUtil.formatDate(dateTime) + " " + DateTimeUtil.formatTime(dateTime), fontSize = 14.sp) },
                 navigationIcon = {
                     TextButton(onClick = { clearDraft(); navController.popBackStack() }) {
-                        Text("取消", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                        Text(stringResource(R.string.editor_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                     }
                 },
                 actions = {
                     TextButton(onClick = {
                         if (blocks.isNotEmpty()) showTagDialog = true
                     }) {
-                        Text("提交", color = MaterialTheme.colorScheme.primary)
+                        Text(stringResource(R.string.editor_submit), color = MaterialTheme.colorScheme.primary)
                     }
                 }
             )
@@ -220,17 +222,17 @@ fun EditorScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ToolbarButton("Aa 文字", onClick = { viewModel.addTextBlock() })
-                    ToolbarButton("🖼 图片", onClick = { showMediaPicker = BlockType.IMAGE })
-                    ToolbarButton("🎬 视频", onClick = { showMediaPicker = BlockType.VIDEO })
-                    ToolbarButton("🎙 录音", onClick = { showMediaPicker = BlockType.VOICE })
+                    ToolbarButton(stringResource(R.string.editor_text_btn), onClick = { viewModel.addTextBlock() })
+                    ToolbarButton(stringResource(R.string.editor_image_btn), onClick = { showMediaPicker = BlockType.IMAGE })
+                    ToolbarButton(stringResource(R.string.editor_video_btn), onClick = { showMediaPicker = BlockType.VIDEO })
+                    ToolbarButton(stringResource(R.string.editor_voice_btn), onClick = { showMediaPicker = BlockType.VOICE })
                 }
             }
         }
     ) { padding ->
         if (blocks.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("✨ 点击下方工具栏开始记录吧", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), fontSize = 14.sp)
+                Text(stringResource(R.string.editor_empty_hint), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), fontSize = 14.sp)
             }
         } else {
             val scrollState = rememberScrollState()
@@ -371,7 +373,7 @@ fun EditorScreen(
 
                 // Hint
                 Text(
-                    "💡 长按拖拽合并到同行 · 双指缩放 · 点击空白处关闭编辑",
+                    stringResource(R.string.editor_drag_hint),
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
                     modifier = Modifier.padding(top = 12.dp)
@@ -384,8 +386,8 @@ fun EditorScreen(
     if (isRecording) {
         AlertDialog(
             onDismissRequest = {},
-            title = { Text("🔴 正在录音...") },
-            text = { Text("点击停止完成录音") },
+            title = { Text(stringResource(R.string.editor_recording_title)) },
+            text = { Text(stringResource(R.string.editor_recording_hint)) },
             confirmButton = {
                 TextButton(onClick = {
                     mediaManager.stopRecording()
@@ -393,7 +395,7 @@ fun EditorScreen(
                     recordingFile?.let { viewModel.addVoiceBlock(it.absolutePath) }
                     recordingFile = null
                 }) {
-                    Text("停止录音", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.editor_stop_recording), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {}

@@ -8,9 +8,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.momentjournal.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,7 +27,7 @@ fun TagManageScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("🏷 标签管理", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.tag_manage_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     TextButton(onClick = { navController.popBackStack() }) {
                         Text("←")
@@ -37,7 +39,7 @@ fun TagManageScreen(
         Column(
             modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)
         ) {
-            Text("⭐ 预设标签", fontWeight = FontWeight.SemiBold, fontSize = 13.sp,
+            Text(stringResource(R.string.tag_preset), fontWeight = FontWeight.SemiBold, fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -53,7 +55,7 @@ fun TagManageScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text("💬 自定义标签", fontWeight = FontWeight.SemiBold, fontSize = 13.sp,
+            Text(stringResource(R.string.tag_custom), fontWeight = FontWeight.SemiBold, fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -80,7 +82,7 @@ fun TagManageScreen(
                 value = newTagName,
                 onValueChange = { newTagName = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("💬 新建标签...") },
+                placeholder = { Text(stringResource(R.string.tag_new_input_placeholder)) },
                 trailingIcon = {
                     TextButton(onClick = {
                         if (newTagName.isNotBlank()) {
@@ -88,7 +90,7 @@ fun TagManageScreen(
                             newTagName = ""
                         }
                     }) {
-                        Text("添加", color = MaterialTheme.colorScheme.primary)
+                        Text(stringResource(R.string.tag_add_btn), color = MaterialTheme.colorScheme.primary)
                     }
                 },
                 shape = RoundedCornerShape(14.dp),

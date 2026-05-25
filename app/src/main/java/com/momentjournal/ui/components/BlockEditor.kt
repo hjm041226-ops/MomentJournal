@@ -12,10 +12,12 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.momentjournal.R
 import com.momentjournal.data.entity.BlockEntity
 import com.momentjournal.data.entity.BlockType
 
@@ -64,14 +66,14 @@ fun BlockEditor(
                         singleLine = false,
                         decorationBox = { innerTextField ->
                             if (text.isEmpty()) {
-                                Text("输入文字...", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f), fontSize = 14.sp)
+                                Text(stringResource(R.string.editor_placeholder), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f), fontSize = 14.sp)
                             }
                             innerTextField()
                         }
                     )
                 } else {
                     Text(
-                        text = if (text.isNotEmpty()) text else "输入文字...",
+                        text = if (text.isNotEmpty()) text else stringResource(R.string.editor_placeholder),
                         modifier = Modifier.padding(14.dp),
                         fontSize = 14.sp,
                         lineHeight = 22.sp,
@@ -98,7 +100,7 @@ fun BlockEditor(
                     )
                 } else {
                     Box(modifier = Modifier.fillMaxWidth().height(60.dp), contentAlignment = Alignment.Center) {
-                        Text("🖼 图片", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
+                        Text(stringResource(R.string.block_image), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
                     }
                 }
             }
@@ -114,7 +116,7 @@ fun BlockEditor(
                 Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("🎬", fontSize = 20.sp)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(if (fileName.isNotEmpty()) fileName else "视频", fontSize = 12.sp,
+                    Text(if (fileName.isNotEmpty()) fileName else stringResource(R.string.block_video), fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 }
             }
@@ -130,7 +132,7 @@ fun BlockEditor(
                 Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("🎙", fontSize = 20.sp)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(if (fileName.isNotEmpty()) fileName else "语音", fontSize = 12.sp,
+                    Text(if (fileName.isNotEmpty()) fileName else stringResource(R.string.block_voice), fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 }
             }

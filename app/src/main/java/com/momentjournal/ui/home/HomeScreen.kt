@@ -12,10 +12,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.momentjournal.MomentJournalApp
+import com.momentjournal.R
 import com.momentjournal.ui.components.CalendarView
 import com.momentjournal.ui.components.EmptyState
 import com.momentjournal.ui.components.TimelineCard
@@ -78,7 +80,7 @@ fun HomeScreen(
                         Text("🎨", fontSize = 15.sp)
                     }
                     TextButton(onClick = { navController.navigate(Routes.TAG_MANAGE) }) {
-                        Text("🏷 标签", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
+                        Text(stringResource(R.string.home_tags), color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
                     }
                 }
             }
@@ -90,8 +92,8 @@ fun HomeScreen(
                 ) {
                     EmptyState(
                         emoji = "🌸",
-                        title = "今天还没有记录哦~",
-                        subtitle = "点右下角 + 记录此刻吧 ✨"
+                        title = stringResource(R.string.home_empty_title),
+                        subtitle = stringResource(R.string.home_empty_subtitle)
                     )
                 }
             } else {

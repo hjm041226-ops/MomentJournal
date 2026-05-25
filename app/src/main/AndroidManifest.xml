@@ -10,7 +10,7 @@
     <application
         android:name=".MomentJournalApp"
         android:allowBackup="true"
-        android:label="随时记"
+        android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Material3.Light.NoActionBar">
         <activity

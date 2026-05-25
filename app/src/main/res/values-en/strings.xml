@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Moment</string>
+    <!-- Home -->
+    <string name="home_empty_title">No records yet~</string>
+    <string name="home_empty_subtitle">Tap + to capture this moment ✨</string>
+    <string name="home_tags">🏷 Tags</string>
+    <!-- Editor -->
+    <string name="editor_cancel">Cancel</string>
+    <string name="editor_submit">Save</string>
+    <string name="editor_text_btn">Aa Text</string>
+    <string name="editor_image_btn">🖼 Image</string>
+    <string name="editor_video_btn">🎬 Video</string>
+    <string name="editor_voice_btn">🎙 Voice</string>
+    <string name="editor_empty_hint">✨ Tap toolbar below to start recording</string>
+    <string name="editor_drag_hint">💡 Long-press drag to merge · Pinch to zoom · Tap outside to dismiss</string>
+    <string name="editor_placeholder">Type something…</string>
+    <string name="editor_recording_title">🔴 Recording…</string>
+    <string name="editor_recording_hint">Tap stop when done</string>
+    <string name="editor_stop_recording">Stop</string>
+    <!-- Media Picker -->
+    <string name="media_image_title">Add Image</string>
+    <string name="media_image_camera">📷 Take Photo</string>
+    <string name="media_image_gallery">🖼 Choose from Gallery</string>
+    <string name="media_video_title">Add Video</string>
+    <string name="media_video_camera">🎬 Record Video</string>
+    <string name="media_video_gallery">🎞 Choose from Gallery</string>
+    <string name="media_voice_title">Add Voice</string>
+    <string name="media_voice_record">🎙 Record Now</string>
+    <string name="media_voice_file">📁 Choose Audio File</string>
+    <string name="media_cancel">Cancel</string>
+    <!-- Tag Selector -->
+    <string name="tag_selector_title">✨ Tag this moment</string>
+    <string name="tag_new_placeholder">💬 Create new tag…</string>
+    <string name="tag_add">+ Add</string>
+    <string name="tag_selected_count">Selected: %d tag(s)</string>
+    <string name="tag_save">🎉 Save Record</string>
+    <string name="tag_cancel">Cancel</string>
+    <!-- Detail -->
+    <string name="detail_edit">✎ Edit</string>
+    <string name="detail_image">🖼 Image</string>
+    <string name="detail_image_error">Cannot load image</string>
+    <string name="detail_video">Video</string>
+    <string name="detail_voice">Voice</string>
+    <string name="detail_play">▶ Play</string>
+    <string name="detail_delete_title">Delete</string>
+    <string name="detail_delete_msg">This cannot be undone. Delete this record?</string>
+    <string name="detail_delete_confirm">Delete</string>
+    <string name="detail_cancel">Cancel</string>
+    <!-- Tag Manage -->
+    <string name="tag_manage_title">🏷 Tag Management</string>
+    <string name="tag_preset">⭐ Preset Tags</string>
+    <string name="tag_custom">💬 Custom Tags</string>
+    <string name="tag_new_input_placeholder">💬 New tag…</string>
+    <string name="tag_add_btn">Add</string>
+    <!-- Theme -->
+    <string name="theme_title">🎨 Choose Theme</string>
+    <string name="theme_subtitle">✨ Pick your favorite style</string>
+    <string name="theme_cute">Cute</string>
+    <string name="theme_tough">Tough</string>
+    <string name="theme_sunshine">Sunshine</string>
+    <string name="theme_cool">Abstract</string>
+    <string name="theme_quirky">Quirky</string>
+    <string name="theme_cute_desc">Warm sakura pink, soft and cozy</string>
+    <string name="theme_tough_desc">Dark and rugged, bold edges</string>
+    <string name="theme_sunshine_desc">Warm yellow, bright and energetic</string>
+    <string name="theme_cool_desc">Minimal blue-gray, cool and calm</string>
+    <string name="theme_quirky_desc">Bold color clash, playful and fun</string>
+    <!-- Block types -->
+    <string name="block_image">🖼 Image</string>
+    <string name="block_video">Video</string>
+    <string name="block_voice">Voice</string>
+</resources>
