@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -234,39 +235,40 @@ fun EditorScreen(
         } else {
             val scrollState = rememberScrollState()
             val bubbleScales by viewModel.bubbleScales.collectAsState()
+            val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
 
             // Drag state
             var draggedIndex by remember { mutableIntStateOf(-1) }
             var dragOffsetX by remember { mutableFloatStateOf(0f) }
             var dragOffsetY by remember { mutableFloatStateOf(0f) }
 
+            // Row groups: each block initially in its own row. Drag-to-merge creates multi-item rows.
+            var rowGroups by remember { mutableStateOf(blocks.indices.map { listOf(it) }) }
+
+            // Sync rowGroups when blocks are added or deleted
+            LaunchedEffect(blocks.size) {
+                val existingIndices = rowGroups.flatten().toSet()
+                val newIndices = blocks.indices.toSet()
+                if (existingIndices != newIndices) {
+                    rowGroups = blocks.indices.map { listOf(it) }
+                }
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { focusManager.clearFocus() }
                     .verticalScroll(scrollState)
                     .padding(horizontal = 10.dp, vertical = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Custom row-based layout: equal width within each row, uniform height
                 val bubbleSpacing = 8.dp
 
-                // Calculate rows: greedy fill, 2 items per row
-                val rows = remember(blocks) {
-                    val result = mutableListOf<MutableList<Int>>()
-                    var currentRow = mutableListOf<Int>()
-                    result.add(currentRow)
-                    blocks.forEachIndexed { index, _ ->
-                        currentRow.add(index)
-                        if (currentRow.size >= 2) {
-                            currentRow = mutableListOf()
-                            result.add(currentRow)
-                        }
-                    }
-                    result.filter { it.isNotEmpty() }
-                }
-
-                rows.forEach { rowIndices ->
+                rowGroups.forEachIndexed { rowIdx, rowIndices ->
                     val fraction = 1f / rowIndices.size.coerceAtLeast(1)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -279,7 +281,6 @@ fun EditorScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth(fraction)
-                                    .fillMaxHeight()
                                     .zIndex(if (isDragging) 10f else 0f)
                                     .graphicsLayer {
                                         translationX = if (isDragging) dragOffsetX else 0f
@@ -302,12 +303,17 @@ fun EditorScreen(
                                                 dragOffsetY = 0f
                                             },
                                             onDragEnd = {
-                                                val rowShift = (dragOffsetY / 80f).roundToInt()
-                                                val colShift = (dragOffsetX / 120f).roundToInt()
-                                                val indexShift = rowShift * 2 + colShift
-                                                val targetIndex = (index + indexShift).coerceIn(0, blocks.size - 1)
-                                                if (targetIndex != index) {
-                                                    viewModel.moveBlock(index, targetIndex)
+                                                // Find the target row based on drag offset
+                                                val targetRowIdx = (rowIdx + (dragOffsetY / 120f).roundToInt())
+                                                    .coerceIn(0, rowGroups.size - 1)
+                                                if (targetRowIdx != rowIdx) {
+                                                    // Move block from current row to target row
+                                                    val newGroups = rowGroups.map { it.toMutableList() }.toMutableList()
+                                                    newGroups[rowIdx].remove(index)
+                                                    if (newGroups[rowIdx].isEmpty()) newGroups.removeAt(rowIdx)
+                                                    val insertIdx = targetRowIdx.coerceIn(0, newGroups.size - 1)
+                                                    newGroups[insertIdx].add(index)
+                                                    rowGroups = newGroups.filter { it.isNotEmpty() }
                                                 }
                                                 draggedIndex = -1
                                                 dragOffsetX = 0f
@@ -342,11 +348,11 @@ fun EditorScreen(
                                     Box {
                                         Text(
                                             "✕", fontSize = 12.sp,
-                                            color = Color(0xFF6B4E5A),
+                                            color = Color.Black,
                                             modifier = Modifier
                                                 .align(Alignment.TopEnd)
                                                 .clickable { viewModel.deleteBlock(index) }
-                                                .padding(4.dp)
+                                                .padding(6.dp)
                                         )
                                         BlockEditor(
                                             block = block,
@@ -359,13 +365,11 @@ fun EditorScreen(
                             }
                         }
                     }
-                    // Spacer between rows
-                    Spacer(modifier = Modifier.height(bubbleSpacing))
                 }
 
                 // Hint
                 Text(
-                    "💡 长按拖拽排序 · 松手自动排列 · 点击文字气泡可编辑",
+                    "💡 长按拖拽合并到同行 · 双指缩放 · 点击空白处关闭编辑",
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
                     modifier = Modifier.padding(top = 12.dp)
