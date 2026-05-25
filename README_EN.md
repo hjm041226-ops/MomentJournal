@@ -12,9 +12,21 @@ Unlike a traditional one-entry-per-day diary, **Moment Journal** supports multip
 - **Free-form Editor** — Insert text, images, video, and voice blocks freely; long-press drag to reorder
 - **Media Capture** — Shoot/record instantly or pick from gallery/files
 - **Tag System** — 6 preset tags + custom tags; assign at submission
-- **Bubble Editor** — Pinch-to-resize, long-press drag to merge, auto-arrange on release
+- **Bubble Editor** — Pinch-to-resize, long-press drag to merge into rows, auto-arrange on release
 - **5 Themes** — Cute (default), Tough, Sunshine, Abstract, Quirky
 - **Internationalization** — Supports Chinese and English; follows system language
+
+## Screenshots
+
+| Home | Editor | Detail | Themes |
+|------|--------|--------|--------|
+| ![Home](screenshots/01-home-calendar.jpg) | ![Editor](screenshots/02-editor.jpg) | ![Detail](screenshots/03-detail.jpg) | ![Themes](screenshots/04-themes.jpg) |
+
+## Download
+
+[![Download APK](https://img.shields.io/badge/Download-APK_v1.0-FF8FA3)](https://github.com/hjm041226-ops/MomentJournal/raw/master/MomentJournal-v1.0-debug.apk)
+
+> Click the button above to download the latest APK and install directly on your Android device.
 
 ## Tech Stack
 
@@ -45,10 +57,6 @@ export ANDROID_SDK_ROOT="<Android SDK path>"
 
 Min SDK: Android 8.0 (API 26)  
 Target SDK: Android 14 (API 34)
-
-## Screenshots
-
-*To be added*
 
 ## License
 
