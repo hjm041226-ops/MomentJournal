@@ -25,13 +25,11 @@ class EditorViewModel(
     private val _selectedTagIds = MutableStateFlow<List<Long>>(emptyList())
     val selectedTagIds: StateFlow<List<Long>> = _selectedTagIds.asStateFlow()
 
-    private val _blockWidths = MutableStateFlow<Map<Int, Float>>(emptyMap())
-    val blockWidths: StateFlow<Map<Int, Float>> = _blockWidths.asStateFlow()
+    private val _bubbleScales = MutableStateFlow<Map<Int, Float>>(emptyMap())
+    val bubbleScales: StateFlow<Map<Int, Float>> = _bubbleScales.asStateFlow()
 
-    fun toggleBlockWidth(index: Int) {
-        val current = _blockWidths.value
-        val currentWidth = current[index] ?: 1f
-        _blockWidths.value = current + (index to if (currentWidth > 0.5f) 0.5f else 1f)
+    fun updateBubbleScale(index: Int, scale: Float) {
+        _bubbleScales.value = _bubbleScales.value + (index to scale.coerceIn(0.5f, 2f))
     }
 
     init {

@@ -10,21 +10,27 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.material3.*
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.core.content.FileProvider
 import com.momentjournal.data.entity.BlockType
 import com.momentjournal.ui.components.BlockEditor
 import com.momentjournal.ui.components.TagSelectorDialog
 import com.momentjournal.ui.components.MediaPickerDialog
 import com.momentjournal.util.DateTimeUtil
+import kotlin.math.roundToInt
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.momentjournal.util.MediaManager
@@ -229,97 +235,136 @@ fun EditorScreen(
             }
         } else {
             val scrollState = rememberScrollState()
-            val blockWidths by viewModel.blockWidths.collectAsState()
+            val bubbleScales by viewModel.bubbleScales.collectAsState()
+
+            // Drag state
             var draggedIndex by remember { mutableIntStateOf(-1) }
-            var dragAccumulatedY by remember { mutableFloatStateOf(0f) }
+            var dragOffsetX by remember { mutableFloatStateOf(0f) }
+            var dragOffsetY by remember { mutableFloatStateOf(0f) }
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
                     .verticalScroll(scrollState)
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // FlowRow for blocks
                 androidx.compose.foundation.layout.FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     blocks.forEachIndexed { index, block ->
-                        val widthFraction = blockWidths[index] ?: 1f
+                        val scale = bubbleScales[index] ?: 1f
                         val isDragging = draggedIndex == index
 
-                        Row(
+                        // Each bubble with gesture support
+                        Box(
                             modifier = Modifier
-                                .then(
-                                    if (widthFraction < 1f)
-                                        Modifier.fillMaxWidth(0.48f)
-                                    else
-                                        Modifier.fillMaxWidth()
-                                )
-                                .zIndex(if (isDragging) 1f else 0f)
+                                .zIndex(if (isDragging) 10f else 0f)
                                 .graphicsLayer {
-                                    translationY = if (isDragging) dragAccumulatedY else 0f
-                                    scaleX = if (isDragging) 1.03f else 1f
-                                    scaleY = if (isDragging) 1.03f else 1f
-                                },
-                            verticalAlignment = Alignment.Top
+                                    scaleX = scale * if (isDragging) 1.05f else 1f
+                                    scaleY = scale * if (isDragging) 1.05f else 1f
+                                    translationX = if (isDragging) dragOffsetX else 0f
+                                    translationY = if (isDragging) dragOffsetY else 0f
+                                    shadowElevation = if (isDragging) 8f else 1f
+                                }
+                                // Pinch-to-resize gesture
+                                .pointerInput(index) {
+                                    detectTransformGestures { _, _, zoom, _ ->
+                                        if (draggedIndex < 0) {
+                                            // Only resize when not already dragging
+                                            val newScale = ((bubbleScales[index] ?: 1f) * zoom)
+                                                .coerceIn(0.5f, 2f)
+                                            viewModel.updateBubbleScale(index, newScale)
+                                        }
+                                    }
+                                }
+                                // Long-press drag gesture
+                                .pointerInput(index) {
+                                    detectDragGesturesAfterLongPress(
+                                        onDragStart = {
+                                            draggedIndex = index
+                                            dragOffsetX = 0f
+                                            dragOffsetY = 0f
+                                        },
+                                        onDragEnd = {
+                                            // Auto-arrange: determine new index based on drag offset
+                                            val itemsPerRow = 3  // approximate
+                                            val rowShift = (dragOffsetY / 80f).roundToInt()
+                                            val colShift = (dragOffsetX / 120f).roundToInt()
+                                            val indexShift = rowShift * itemsPerRow + colShift
+                                            val targetIndex = (index + indexShift).coerceIn(0, blocks.size - 1)
+                                            if (targetIndex != index) {
+                                                viewModel.moveBlock(index, targetIndex)
+                                            }
+                                            draggedIndex = -1
+                                            dragOffsetX = 0f
+                                            dragOffsetY = 0f
+                                        },
+                                        onDragCancel = {
+                                            draggedIndex = -1
+                                            dragOffsetX = 0f
+                                            dragOffsetY = 0f
+                                        },
+                                        onDrag = { change, offset ->
+                                            change.consume()
+                                            dragOffsetX += offset.x
+                                            dragOffsetY += offset.y
+                                        }
+                                    )
+                                }
                         ) {
-                            // Left control bar: drag handle + up/down + width toggle
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(top = 6.dp)
+                            // Bubble card
+                            androidx.compose.material3.Card(
+                                modifier = Modifier,
+                                shape = RoundedCornerShape(20.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surface
+                                ),
+                                elevation = CardDefaults.cardElevation(
+                                    defaultElevation = if (isDragging) 6.dp else 1.dp
+                                )
                             ) {
-                                // Width toggle button
-                                Text(
-                                    text = if (widthFraction < 1f) "⤢" else "⤡",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                                    modifier = Modifier
-                                        .clickable { viewModel.toggleBlockWidth(index) }
-                                        .padding(2.dp)
-                                )
-                                // Move up
-                                Text("▲", fontSize = 10.sp,
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = if (index > 0) 0.4f else 0.15f),
-                                    modifier = Modifier
-                                        .clickable(enabled = index > 0) { viewModel.moveBlock(index, index - 1) }
-                                        .padding(2.dp)
-                                )
-                                // Drag handle
-                                Text("⠿", fontSize = 18.sp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
-                                    modifier = Modifier.width(24.dp)
-                                )
-                                // Move down
-                                Text("▼", fontSize = 10.sp,
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = if (index < blocks.size - 1) 0.4f else 0.15f),
-                                    modifier = Modifier
-                                        .clickable(enabled = index < blocks.size - 1) { viewModel.moveBlock(index, index + 1) }
-                                        .padding(2.dp)
-                                )
-                            }
+                                Box(modifier = Modifier.padding(4.dp)) {
+                                    // Delete button — subtle X in top-right corner
+                                    Text(
+                                        "✕",
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .clickable { viewModel.deleteBlock(index) }
+                                            .padding(4.dp)
+                                    )
 
-                            // The block editor content
-                            Box(modifier = Modifier.weight(1f)) {
-                                BlockEditor(
-                                    block = block,
-                                    onContentChange = { content -> viewModel.updateBlockContent(index, content) },
-                                    onDelete = { viewModel.deleteBlock(index) }
-                                )
+                                    // Bubble type label
+                                    val bubbleColor = when (block.type) {
+                                        com.momentjournal.data.entity.BlockType.TEXT -> Color(0xFFFFF0F0)
+                                        com.momentjournal.data.entity.BlockType.IMAGE -> Color(0xFFF0F4FF)
+                                        com.momentjournal.data.entity.BlockType.VIDEO -> Color(0xFFF0FFF4)
+                                        com.momentjournal.data.entity.BlockType.VOICE -> Color(0xFFFFF8F0)
+                                    }
+
+                                    BlockEditor(
+                                        block = block,
+                                        onContentChange = { content -> viewModel.updateBlockContent(index, content) },
+                                        onDelete = { viewModel.deleteBlock(index) },
+                                        bubbleColor = bubbleColor
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
-                // Hint text
+                // Hint
                 Text(
-                    "💡 点击 ⤡ 切换半宽/全宽，点击 ▲▼ 调整顺序，长按 ⠿ 拖拽",
+                    "💡 双指缩放气泡 · 长按拖拽排序 · 松手自动排列",
                     fontSize = 10.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
-                    modifier = Modifier.padding(top = 8.dp)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                    modifier = Modifier.padding(top = 12.dp)
                 )
             }
         }
