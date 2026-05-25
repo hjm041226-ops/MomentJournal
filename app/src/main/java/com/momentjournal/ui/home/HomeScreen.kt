@@ -73,8 +73,13 @@ fun HomeScreen(
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                 )
-                TextButton(onClick = { navController.navigate(Routes.TAG_MANAGE) }) {
-                    Text("🏷 标签", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(onClick = { navController.navigate(Routes.THEME_PICKER) }) {
+                        Text("🎨", fontSize = 15.sp)
+                    }
+                    TextButton(onClick = { navController.navigate(Routes.TAG_MANAGE) }) {
+                        Text("🏷 标签", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
+                    }
                 }
             }
 

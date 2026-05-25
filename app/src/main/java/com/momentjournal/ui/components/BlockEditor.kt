@@ -8,6 +8,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -29,6 +31,11 @@ fun BlockEditor(
         BlockType.TEXT -> {
             var isEditing by remember { mutableStateOf(false) }
             var text by remember(block.id, block.content) { mutableStateOf(block.content) }
+            val focusRequester = remember { FocusRequester() }
+
+            LaunchedEffect(isEditing) {
+                if (isEditing) focusRequester.requestFocus()
+            }
 
             Surface(
                 modifier = modifier
@@ -44,7 +51,10 @@ fun BlockEditor(
                             text = newText
                             onContentChange(newText)
                         },
-                        modifier = Modifier.padding(14.dp).fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(14.dp)
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
                         textStyle = TextStyle(
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface,

@@ -347,10 +347,12 @@ fun EditorScreen(
                                 ) {
                                     Box {
                                         Text(
-                                            "✕", fontSize = 12.sp,
+                                            "✕", fontSize = 14.sp,
+                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                                             color = Color.Black,
                                             modifier = Modifier
                                                 .align(Alignment.TopEnd)
+                                                .zIndex(2f)
                                                 .clickable { viewModel.deleteBlock(index) }
                                                 .padding(6.dp)
                                         )

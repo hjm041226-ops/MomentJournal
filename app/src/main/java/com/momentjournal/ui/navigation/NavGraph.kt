@@ -18,19 +18,26 @@ import com.momentjournal.ui.editor.EditorViewModel
 import com.momentjournal.ui.home.HomeScreen
 import com.momentjournal.ui.tag.TagManageScreen
 import com.momentjournal.ui.tag.TagViewModel
+import com.momentjournal.ui.theme.AppThemeType
+import com.momentjournal.ui.theme.ThemePickerScreen
 
 object Routes {
     const val HOME = "home"
     const val EDITOR = "editor/{recordId}"
     const val DETAIL = "detail/{recordId}"
     const val TAG_MANAGE = "tag_manage"
+    const val THEME_PICKER = "theme_picker"
 
     fun editor(recordId: Long = -1) = "editor/$recordId"
     fun detail(recordId: Long) = "detail/$recordId"
 }
 
 @Composable
-fun NavGraph(navController: NavHostController) {
+fun NavGraph(
+    navController: NavHostController,
+    themeType: AppThemeType,
+    onThemeChange: (AppThemeType) -> Unit
+) {
     val app = LocalContext.current.applicationContext as MomentJournalApp
 
     NavHost(navController = navController, startDestination = Routes.HOME) {
@@ -80,6 +87,14 @@ fun NavGraph(navController: NavHostController) {
             TagManageScreen(
                 navController = navController,
                 viewModel = viewModel(factory = TagViewModel.Factory(repository))
+            )
+        }
+
+        composable(Routes.THEME_PICKER) {
+            ThemePickerScreen(
+                currentTheme = themeType,
+                onThemeSelected = { onThemeChange(it) },
+                onBack = { navController.popBackStack() }
             )
         }
     }
