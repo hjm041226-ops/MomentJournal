@@ -18,9 +18,9 @@
 
 ## 屏幕截图
 
-| 主页 | 编辑器 | 详情 | 主题 |
+| 主页 | 主题 | 标签管理 | 编辑 |
 |------|--------|------|------|
-| ![主页](screenshots/01-home-calendar.jpg) | ![编辑器](screenshots/02-editor.jpg) | ![详情](screenshots/03-detail.jpg) | ![主题](screenshots/04-themes.jpg) |
+| ![主页](screenshots/01-home-calendar.jpg) | ![主题](screenshots/02-editor.jpg) | ![标签管理](screenshots/03-detail.jpg) | ![编辑](screenshots/04-themes.jpg) |
 
 ## 下载安装
 
